@@ -130,6 +130,15 @@ func (auData *GameData) GetByColor(text string) (PlayerData, bool) {
 	return UnlinkedPlayer, false
 }
 
+func (auData *GameData) GetByColorInt(color int) (PlayerData, bool) {
+	for _, playerData := range auData.PlayerData {
+		if playerData.Color == color {
+			return playerData, true
+		}
+	}
+	return UnlinkedPlayer, false
+}
+
 func (auData *GameData) GetByName(text string) (PlayerData, bool) {
 	text = strings.ToLower(text)
 

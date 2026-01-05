@@ -81,20 +81,29 @@ func (dgs *GameState) ToEmojiEmbedFields(emojis AlivenessEmojis, sett *settings.
 		if player.Color < 0 || player.Color > 17 {
 			break
 		}
+		matchedUserID := ""
 		for _, userData := range dgs.UserData {
-			if userData.InGameName == player.Name {
-				emoji := emojis[player.IsAlive][player.Color]
-				unsorted[player.Color] = &discordgo.MessageEmbedField{
-					Name:   player.Name,
-					Value:  fmt.Sprintf("%s <@!%s>", emoji.FormatForInline(), userData.GetID()),
-					Inline: true,
-				}
+			if userData.PlayerColor != nil && *userData.PlayerColor == player.Color {
+				matchedUserID = userData.GetID()
 				break
 			}
 		}
-		// no player matched; unlinked player
-		if unsorted[player.Color] == nil {
-			emoji := emojis[player.IsAlive][player.Color]
+		if matchedUserID == "" {
+			for _, userData := range dgs.UserData {
+				if userData.InGameName == player.Name {
+					matchedUserID = userData.GetID()
+					break
+				}
+			}
+		}
+		emoji := emojis[player.IsAlive][player.Color]
+		if matchedUserID != "" {
+			unsorted[player.Color] = &discordgo.MessageEmbedField{
+				Name:   player.Name,
+				Value:  fmt.Sprintf("%s <@!%s>", emoji.FormatForInline(), matchedUserID),
+				Inline: true,
+			}
+		} else {
 			unsorted[player.Color] = &discordgo.MessageEmbedField{
 				Name: player.Name,
 				Value: fmt.Sprintf("%s **%s**", emoji.FormatForInline(), sett.LocalizeMessage(&i18n.Message{
@@ -115,7 +124,6 @@ func (dgs *GameState) ToEmojiEmbedFields(emojis AlivenessEmojis, sett *settings.
 			num++
 		}
 	}
-	// balance out the last row of embeds with an extra inline field
 	if num%3 == 2 {
 		sorted = append(sorted, &discordgo.MessageEmbedField{
 			Name:   "\u200b",

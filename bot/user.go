@@ -18,6 +18,7 @@ type UserData struct {
 	ShouldBeMute bool   `json:"ShouldBeMute"`
 	ShouldBeDeaf bool   `json:"ShouldBeDeaf"`
 	InGameName   string `json:"PlayerName"`
+	PlayerColor  *int   `json:"PlayerColor,omitempty"`
 }
 
 func MakeUserDataFromDiscordUser(dUser *discordgo.User, nick string) UserData {
@@ -56,4 +57,18 @@ func (user *UserData) GetPlayerName() string {
 
 func (user *UserData) Link(player amongus.PlayerData) {
 	user.InGameName = player.Name
+	user.PlayerColor = &player.Color
+}
+
+func (user *UserData) Unlink() {
+	user.InGameName = amongus.UnlinkedPlayerName
+	user.PlayerColor = nil
+}
+
+func (user *UserData) GetPlayerColor() *int {
+	return user.PlayerColor
+}
+
+func (user *UserData) IsLinked() bool {
+	return user.InGameName != amongus.UnlinkedPlayerName
 }

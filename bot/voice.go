@@ -62,8 +62,7 @@ func (bot *Bot) applyToAll(dgs *GameState, mute, deaf bool) error {
 
 		tracked := voiceState.ChannelID != "" && dgs.VoiceChannel == voiceState.ChannelID
 
-		_, linked := dgs.GameData.GetByName(userData.InGameName)
-		// only actually tracked if we're in a tracked channel AND linked to a player
+		_, linked := dgs.ResolveLinkedPlayer(userData)
 		tracked = tracked && linked
 
 		if tracked {
@@ -123,17 +122,14 @@ func (bot *Bot) handleTrackedMembers(sess *discordgo.Session, sett *settings.Gui
 
 		tracked := voiceState.ChannelID != "" && dgs.VoiceChannel == voiceState.ChannelID
 
-		auData, found := dgs.GameData.GetByName(userData.InGameName)
-		// only actually tracked if we're in a tracked channel AND linked to a player
+		auData, found := dgs.ResolveLinkedPlayer(userData)
 		var isAlive bool
 
-		// only actually tracked if we're in a tracked channel AND linked to a player
 		if !sett.GetMuteSpectator() {
 			tracked = tracked && found
 			isAlive = auData.IsAlive
 		} else {
 			if !found {
-				// we just assume the spectator is dead
 				isAlive = false
 			} else {
 				isAlive = auData.IsAlive

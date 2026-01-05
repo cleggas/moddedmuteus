@@ -65,17 +65,14 @@ func (bot *Bot) handleVoiceStateChange(s *discordgo.Session, m *discordgo.VoiceS
 
 	tracked := m.ChannelID != "" && dgs.VoiceChannel == m.ChannelID
 
-	auData, found := dgs.GameData.GetByName(userData.InGameName)
-
+	auData, found := dgs.ResolveLinkedPlayer(userData)
 	var isAlive bool
 
-	// only actually tracked if we're in a tracked channel AND linked to a player
 	if !sett.GetMuteSpectator() {
 		tracked = tracked && found
 		isAlive = auData.IsAlive
 	} else {
 		if !found {
-			// we just assume the spectator is dead
 			isAlive = false
 		} else {
 			isAlive = auData.IsAlive

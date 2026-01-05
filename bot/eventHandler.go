@@ -322,6 +322,7 @@ func (bot *Bot) processPlayer(sett *settings.GuildSettings, player game.Player, 
 				uids, err = bot.RedisInterface.GetUsernameOrUserIDMappings(dgs.GuildID, player.Name)
 				userID = dgs.AttemptPairingByUserIDs(data, uids)
 			}
+			dgs.UpdateLinkedUserColor(data.Name, data.Color)
 			bot.DispatchRefreshOrEdit(dgs, dgsRequest, sett)
 			return true, userID, dgs, err
 		case updated:
@@ -331,6 +332,7 @@ func (bot *Bot) processPlayer(sett *settings.GuildSettings, player game.Player, 
 				uids, err = bot.RedisInterface.GetUsernameOrUserIDMappings(dgs.GuildID, player.Name)
 				userID = dgs.AttemptPairingByUserIDs(data, uids)
 			}
+			dgs.UpdateLinkedUserColor(data.Name, data.Color)
 			if isAliveUpdated && dgs.GameData.GetPhase() == game.TASKS {
 				if sett.GetUnmuteDeadDuringTasks() || player.Action == game.EXILED {
 					bot.DispatchRefreshOrEdit(dgs, dgsRequest, sett)

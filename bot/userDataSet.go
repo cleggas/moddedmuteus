@@ -12,7 +12,7 @@ func (dgs *GameState) GetCountLinked() int {
 	LinkedPlayerCount := 0
 
 	for _, v := range dgs.UserData {
-		if v.InGameName != amongus.UnlinkedPlayerName {
+		if v.IsLinked() {
 			LinkedPlayerCount++
 		}
 	}
@@ -40,8 +40,7 @@ func (dgs *GameState) UpdateUserData(userID string, data UserData) {
 func (dgs *GameState) AttemptPairingByUserIDs(data amongus.PlayerData, userIDs map[string]interface{}) string {
 	for userID := range userIDs {
 		if v, ok := dgs.UserData[userID]; ok {
-			// only attempt to link players that aren't paired already
-			if v.GetPlayerName() == amongus.UnlinkedPlayerName {
+			if !v.IsLinked() {
 				v.Link(data)
 				dgs.UserData[userID] = v
 			}
@@ -53,7 +52,7 @@ func (dgs *GameState) AttemptPairingByUserIDs(data amongus.PlayerData, userIDs m
 
 func (dgs *GameState) ClearPlayerData(userID string) bool {
 	if v, ok := dgs.UserData[userID]; ok {
-		v.InGameName = amongus.UnlinkedPlayerName
+		v.Unlink()
 		dgs.UserData[userID] = v
 		return true
 	}
@@ -63,7 +62,7 @@ func (dgs *GameState) ClearPlayerData(userID string) bool {
 func (dgs *GameState) ClearPlayerDataByPlayerName(playerName string) {
 	for i, v := range dgs.UserData {
 		if v.GetPlayerName() == playerName {
-			v.InGameName = amongus.UnlinkedPlayerName
+			v.Unlink()
 			dgs.UserData[i] = v
 			return
 		}
@@ -72,7 +71,7 @@ func (dgs *GameState) ClearPlayerDataByPlayerName(playerName string) {
 
 func (dgs *GameState) UnlinkAllUsers() {
 	for i, v := range dgs.UserData {
-		v.InGameName = amongus.UnlinkedPlayerName
+		v.Unlink()
 		dgs.UserData[i] = v
 	}
 }
@@ -82,4 +81,14 @@ func (dgs *GameState) GetUser(userID string) (UserData, error) {
 		return v, nil
 	}
 	return UserData{}, fmt.Errorf("no User found with ID %s", userID)
+}
+
+func (dgs *GameState) UpdateLinkedUserColor(playerName string, newColor int) {
+	for i, v := range dgs.UserData {
+		if v.GetPlayerName() == playerName {
+			v.PlayerColor = &newColor
+			dgs.UserData[i] = v
+			return
+		}
+	}
 }
